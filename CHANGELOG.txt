@@ -1,0 +1,53 @@
+===============================================================================
+  ANOTHER EDEN BEGINS - HARD MODE
+  Changelog
+===============================================================================
+
+
+-------------------------------------------------------------------------------
+  1.0.0  -  First public release
+-------------------------------------------------------------------------------
+For the DEMO of Another Eden Begins. NOT tested on the full release - it will
+need re-testing and re-tuning when the full game ships.
+
+  * Three difficulty tiers: Hard, VeryHard and Extreme, plus Off.
+    Starts on Hard.
+
+  * Enemy health, attack, defence and final damage are all scaled per tier.
+    Ordinary enemies roll their own values from their enemy ID, so a given
+    enemy is always the same across encounters, reloads and saves.
+
+  * Bosses are tuned on their own dials and never roll randomly, so a boss
+    fight is decided by play rather than by luck.
+
+  * Scaling grows with enemy level. Early enemies keep gentler numbers, so the
+    opening hours are not punished with values meant for the endgame.
+
+  * Out-levelling content no longer trivialises it. The vanilla damage bonus
+    for being above an enemy's level is removed, while the penalty for being
+    below it is kept.
+
+  * Eight specific story encounters are hand-tuned, for fights that are harder
+    for reasons raw numbers cannot see - such as battles where healing is not
+    available to you.
+
+  * Fleeing a battle always succeeds. Battles the game does not let you flee
+    are unaffected.
+
+  * Optional experience and money multipliers, OFF by default.
+
+  * Every setting is adjustable in the config file, and every one is explained
+    there in plain language.
+
+  * No game file is modified. The mod works entirely through in-memory hooks,
+    and deleting it restores the vanilla game exactly.
+
+  KNOWN LIMITATIONS
+  * EXTREME IS UNTESTED. Hard and VeryHard were both played to the end of the
+    demo. Nobody has finished the game on Extreme.
+  * Enemy shield / break counts are not scaled yet.
+  * Two settings crash the game and are disabled by default, with warnings in
+    the config file: Disable Reserve Party HP Regen and Disable Reserve Party
+    MP Regen.
+  * Requires a BLEEDING EDGE BepInEx 6 build (6.0.0-be.788 or newer). Stable
+    BepInEx releases crash on this game. See the README.
