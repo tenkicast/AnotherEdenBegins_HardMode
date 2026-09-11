@@ -20,6 +20,8 @@ No game file is ever modified. The mod works entirely through in-memory hooks �
 
 **[Download from Nexus Mods]([https://www.nexusmods.com/anotheredenbegins](https://www.nexusmods.com/anotheredenbegins/mods/1))** — releases are published there, not here. This repository holds the source only.
 
+https://www.nexusmods.com/anotheredenbegins/mods/1
+
 ## Features
 
 - **Three tiers** — Hard, VeryHard, Extreme, plus Off. It Ships on Hard.
