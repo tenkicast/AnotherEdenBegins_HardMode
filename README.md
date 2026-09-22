@@ -1,16 +1,14 @@
 # Another Eden Begins — Hard Mode
 
-A runtime difficulty mod for the **demo** of *Another Eden Begins*. Enemies get more health, more defence, and hit harder across three difficulty tiers.
+A runtime difficulty mod for *Another Eden Begins*. Enemies get more health, more defence, and hit harder across three difficulty tiers.
 
 No game file is ever modified. The mod works entirely through in-memory hooks — deleting the plugin restores the vanilla game exactly, and saves are never touched.
 
-> ## ⚠ Disclaimer — demo only, untested on the full game
+> ## ⚠ Before you install
 >
-> This is built and tested against the **demo** of *Another Eden Begins*, and only the demo. It has **not** been tested on the full release and should not be assumed to work there.
+> **The BepInEx version matters more than anything else here.** You need a bleeding-edge BepInEx 6 build — the stable release crashes this game on startup. See [Installing](#installing-users) below; this is the single most common cause of "the mod doesn't work".
 >
-> The mod reads the game's own code, its enemy data and its exact enemy IDs. All three change between builds, so on the full game this will at best do nothing useful and at worst behave unpredictably — the hand-tuned boss rules in particular are keyed to specific demo enemy IDs that may belong to entirely different enemies.
->
-> When the full game releases, it will need re-testing and re-tuning from scratch. Please wait for an updated version rather than forcing this one.
+> Balance is tuned by hand and is a matter of taste. If a fight feels wrong, it probably is — please say so rather than assuming it's intended.
 >
 > Offered with no warranty of any kind — see the [LICENSE](LICENSE). It modifies no game files and touches no saves, so the worst realistic outcome is that the game fails to start.
 
@@ -18,13 +16,11 @@ No game file is ever modified. The mod works entirely through in-memory hooks �
 
 ### Download
 
-**[Download from Nexus Mods]([https://www.nexusmods.com/anotheredenbegins](https://www.nexusmods.com/anotheredenbegins/mods/1))** — releases are published there, not here. This repository holds the source only.
-
-https://www.nexusmods.com/anotheredenbegins/mods/1
+**[Download from Nexus Mods](https://www.nexusmods.com/anotheredenbegins/mods/1)** — releases are published there, not here. This repository holds the source only.
 
 ## Features
 
-- **Three tiers** — Hard, VeryHard, Extreme, plus Off. It Ships on Hard.
+- **Three tiers** — Hard, VeryHard, Extreme, plus Off. Ships on Hard.
 - **Per-enemy scaling** — HP, attack, defence and final damage. Ordinary enemies roll their values from a hash of their enemy ID, so a given enemy is always identical across encounters, reloads and saves.
 - **Separate boss tuning** — bosses take the midpoint of each range rather than a roll, so a boss fight is never decided by luck.
 - **Level-aware ramps** — scaling grows, so early enemies aren't punished with endgame numbers.
@@ -81,7 +77,7 @@ dotnet build -c Release
 If the game isn't at the default Steam path, point the build at it:
 
 ```bash
-dotnet build -c Release -p:GameDir="D:\Games\Another Eden Begins Demo"
+dotnet build -c Release -p:GameDir="D:\Games\Another Eden Begins"
 ```
 
 A wrong path fails fast with a message telling you exactly what to set. Output lands in `bin/Release/net6.0/AnotherEdenHardMode.dll`.
@@ -110,7 +106,7 @@ Two rules were learned the hard way and are worth knowing before adding hooks:
 
 ## Feedback
 
-Balance was tuned by two people playing the demo through and arguing about numbers. That's a small sample, so reports are genuinely useful. Please open an issue with:
+Balance was tuned by hand against real fights, by a small number of people arguing about numbers. That's a small sample, so reports are genuinely useful. Please open an issue with:
 
 - which tier you're on
 - which fight, and roughly your level
@@ -118,7 +114,7 @@ Balance was tuned by two people playing the demo through and arguing about numbe
 
 Attaching a log helps enormously. Set `Verbose Logging = true` and grab `BepInEx/LogOutput.log`; it records every enemy's rolled stats and every hit on both sides.
 
-**Extreme especially needs testing** — Hard and VeryHard were both played to the end of the demo, but nobody has finished on Extreme.
+**Extreme is the least tested tier.** It's built to be a genuine step above VeryHard rather than a joke, but it has had far fewer eyes on it than Hard and VeryHard — feedback on it is especially welcome.
 
 ---
 

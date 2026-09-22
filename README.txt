@@ -1,9 +1,9 @@
 ===============================================================================
   ANOTHER EDEN BEGINS - HARD MODE
-  Version 1.0.0
+  Version 1.0.1
 ===============================================================================
 
-The demo is generous. This makes it fight back.
+Another Eden Begins is generous. This makes it fight back.
 
 Enemies get more health, more defence and hit harder, on three difficulty tiers.
 Bosses are tuned separately from ordinary enemies, and a handful of specific
@@ -20,19 +20,14 @@ Releases are published on Nexus Mods. The GitHub repository holds the source
 code only - there are no downloads there.
 
 -------------------------------------------------------------------------------
-  DISCLAIMER - DEMO ONLY, UNTESTED ON THE FULL GAME
+  BEFORE YOU INSTALL
 -------------------------------------------------------------------------------
-This mod is built and tested against the DEMO of Another Eden Begins, and only
-the demo. It has NOT been tested on the full release and should not be assumed
-to work there.
+The BepInEx version matters more than anything else here. You need a BLEEDING
+EDGE BepInEx 6 build - the stable release crashes this game on startup. See
+REQUIREMENTS below. This is by far the most common cause of "it doesn't work".
 
-It reads the game's own code, its enemy data and its exact enemy IDs. All three
-change between builds, so on the full game this will at best do nothing useful
-and at worst behave unpredictably - the hand-tuned boss rules in particular are
-keyed to specific demo enemy IDs that may belong to entirely different enemies.
-
-When the full game releases it will need re-testing and re-tuning from scratch.
-Please wait for an updated version rather than forcing this one.
+Balance is tuned by hand and is a matter of taste. If a fight feels wrong, it
+probably is - please say so rather than assuming it is intended.
 
 Use at your own risk. It modifies no game files and touches no saves, so the
 worst realistic outcome is that the game fails to start - but it is offered
@@ -68,7 +63,7 @@ game folder as normal.
 
 3. Drop AnotherEdenHardMode.dll into:
 
-       ...\Another Eden Begins Demo\BepInEx\plugins\
+       ...\Another Eden Begins\BepInEx\plugins\
 
 4. Launch. On this first run the mod writes its settings file to:
 
@@ -81,17 +76,16 @@ That is it. The mod starts on HARD, which is the intended starting point.
   DIFFICULTY TIERS
 -------------------------------------------------------------------------------
   HARD        The intended experience. Enemies have noticeably more health and
-              hit meaningfully harder, but fights stay brisk. Playtested to the
-              end of the demo.
+              hit meaningfully harder, but fights stay brisk. This is the most
+              played tier.
 
   VERYHARD    For people who found Hard comfortable. Roughly half again as much
-              enemy health as vanilla, with a real jump in damage. Also
-              playtested to the end of the demo.
+              enemy health as vanilla, with a real jump in damage.
 
-  EXTREME     Enemies are faster, tougher and hit far harder. This tier has NOT
-              been playtested by anyone. It is built to be a genuine step above
-              VeryHard rather than a joke, but you are the first. Feedback on it
-              is very welcome.
+  EXTREME     Enemies are faster, tougher and hit far harder. This is the LEAST
+              TESTED tier by some distance. It is built to be a genuine step
+              above VeryHard rather than a joke, but it has had far fewer eyes
+              on it. Feedback on it is especially welcome.
 
   OFF         Fully vanilla. Disables the entire mod without uninstalling it.
 
@@ -196,9 +190,9 @@ TWO SETTINGS TO LEAVE ALONE
 -------------------------------------------------------------------------------
   FEEDBACK
 -------------------------------------------------------------------------------
-This was tuned by two people playing through the demo and arguing about the
-numbers. That is a small sample, and balance is personal - so if something feels
-wrong, please say so.
+This was tuned by hand against real fights, by a small number of people arguing
+about the numbers. That is a small sample, and balance is personal - so if
+something feels wrong, please say so.
 
 The most useful reports include:
   * which tier you are on
@@ -218,7 +212,7 @@ The mod is open source under the MIT licence - read exactly what it does, or
 open an issue, at:
     https://github.com/tenkicast/AnotherEdenBegins_HardMode
 
-EXTREME especially needs eyes on it. Nobody has finished the demo on that tier.
+EXTREME especially needs eyes on it - it is the least tested tier by far.
 
 
 -------------------------------------------------------------------------------

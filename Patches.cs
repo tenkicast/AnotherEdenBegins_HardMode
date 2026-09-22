@@ -679,7 +679,7 @@ internal static class RewardPatches
     private static void Gold_Postfix(ref int __result) => ScaleMoney(ref __result, "gold");
 
     /// <summary>
-    /// The demo populates Gold on some enemies and DropCurrency on others, so both are
+    /// The game populates Gold on some enemies and DropCurrency on others, so both are
     /// scaled. They are alternative fields on the same reward, never summed, so this
     /// cannot double up.
     /// </summary>

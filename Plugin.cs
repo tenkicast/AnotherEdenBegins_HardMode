@@ -11,7 +11,7 @@ public class HardModePlugin : BasePlugin
 {
     public const string Guid = "tenkicast_anotheredenbegins_hardmode";
     public const string Name = "Another Eden Begins - Hard Mode";
-    public const string Version = "1.0.0";
+    public const string Version = "1.0.1";
 
     internal static ModConfig Cfg;
     internal static ManualLogSource Logger;

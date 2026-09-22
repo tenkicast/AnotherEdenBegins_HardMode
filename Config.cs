@@ -177,7 +177,7 @@ internal sealed class ModConfig
             "Multiplies the HP bonus applied to BOSSES only, on top of the tier's MaxHP roll. "
             + "Bosses already have huge base HP (Stoneguard Abbetos has 3999 at Lv5), so the same multiplier "
             + "that makes a goblin interesting turns a boss into a war of attrition - which is punishing in a "
-            + "demo with no items, because the fight outlasts your MP rather than testing your play. "
+            + "fight with no items to fall back on, because it outlasts your MP rather than testing your play. "
             + "Scales the BONUS only, so a boss can never drop below vanilla HP: a 1.78 roll at 0.5 becomes 1.39. 1.0 gives bosses the full tier multiplier, 0 gives them vanilla HP. "
             + "Tuned by playtest. At 0.8 a Lv23 boss reached 79175 effective HP from a 41375 base, which "
             + "is a half-hour fight rather than a hard one; below 0.7 bosses died too quickly once player "
@@ -192,8 +192,8 @@ internal sealed class ModConfig
 
         BossDamageScale = cfg.Bind(general, "Boss Damage Scale", 0.9f,
             "Scales the tier's enemy Damage Multiplier for BOSSES only. Boss damage compounds twice - once "
-            + "through the boosted attack stat and again through the final damage multiplier - and in a demo "
-            + "with no items, high boss damage forces the party to spend its turns healing instead of "
+            + "through the boosted attack stat and again through the final damage multiplier - and with no items "
+            + "to fall back on, high boss damage forces the party to spend its turns healing instead of "
             + "attacking, which lengthens the fight and demands yet more healing. 1.0 gives bosses the full "
             + "tier damage multiplier. "
             + "Held slightly below 1.0 on purpose. Bosses land on a softer "
@@ -255,7 +255,7 @@ internal sealed class ModConfig
         MoneyMultiplier = cfg.Bind(rewards, "Money Multiplier", 1.0f,
             "Multiplies the money every enemy awards. 1.0 is VANILLA and is the default, for the same "
             + "reason as the experience multiplier above. Covers both the Gold field and the "
-            + "DropCurrency field, because the demo's enemies use them inconsistently and only one of the "
+            + "DropCurrency field, because the game's enemies use them inconsistently and only one of the "
             + "two is populated per enemy. Shop and equipment prices are NOT touched - those live on "
             + "separate master data - so this raises income without also raising costs.");
 

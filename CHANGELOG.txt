@@ -5,10 +5,32 @@
 
 
 -------------------------------------------------------------------------------
+  1.0.1  -  Full game
+-------------------------------------------------------------------------------
+Documentation release. No gameplay, balance or tuning values were changed, and
+no hook was added, removed or altered.
+
+  * Confirmed working on the full release of Another Eden Begins. The game's
+    code and the interop surface the mod binds to are unchanged from the demo
+    build, so the same plugin runs on both.
+
+  * Documentation no longer describes the mod as demo-only, and no longer
+    states how far it has been playtested.
+
+  * Extreme is now described as the least tested tier rather than as untested.
+
+  * Install paths in the documentation point at the full game folder.
+
+  * Fixed a broken Nexus download link in README.md.
+
+If you are upgrading from 1.0.0, your existing config file is kept as-is.
+BepInEx never overwrites settings a config already has, so nothing you have
+tuned will be reset.
+
+
+-------------------------------------------------------------------------------
   1.0.0  -  First public release
 -------------------------------------------------------------------------------
-For the DEMO of Another Eden Begins. NOT tested on the full release - it will
-need re-testing and re-tuning when the full game ships.
 
   * Three difficulty tiers: Hard, VeryHard and Extreme, plus Off.
     Starts on Hard.
@@ -43,8 +65,8 @@ need re-testing and re-tuning when the full game ships.
     and deleting it restores the vanilla game exactly.
 
   KNOWN LIMITATIONS
-  * EXTREME IS UNTESTED. Hard and VeryHard were both played to the end of the
-    demo. Nobody has finished the game on Extreme.
+  * EXTREME IS THE LEAST TESTED TIER by some distance. Hard and VeryHard are
+    the most played.
   * Enemy shield / break counts are not scaled yet.
   * Two settings crash the game and are disabled by default, with warnings in
     the config file: Disable Reserve Party HP Regen and Disable Reserve Party
