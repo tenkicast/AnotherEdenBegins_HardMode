@@ -5,6 +5,48 @@
 
 
 -------------------------------------------------------------------------------
+  1.0.2  -  Locale fix (important) and shop overrides
+-------------------------------------------------------------------------------
+  *** IF YOUR SYSTEM USES A COMMA AS THE DECIMAL SEPARATOR, UPDATE. ***
+
+  * FIXED: per-encounter rules were parsed using the machine's regional settings.
+    The values in Special Enemy Ids are written with a DOT, so on a system whose
+    locale uses a COMMA for decimals - Italian, German, Spanish, French and most
+    of Europe and South America - "0.5" was read as 5 and "0.75" as 75.
+
+    MEASURED from a user log, Galliard Lv18 came out at HP x3.21, ATK x16.00 and
+    a final damage multiplier of x108, hitting for 1,778,760 damage - over
+    150,000% of a character's max HP. Forest Guardian was running at x10.44
+    damage instead of x1.044, which is why it one-shot on every difficulty.
+
+    On French and Portuguese systems the value failed to parse at all instead,
+    and the encounter silently fell back to the shared default scales, so the
+    per-encounter tuning was quietly ignored.
+
+    All config numbers are now read with the invariant culture, so a dot is a
+    decimal point on every machine. No config change is needed - existing files
+    keep working and simply mean what they say.
+
+  * Startup now prints every per-encounter rule AS PARSED, with the numbers
+    formatted invariantly. The bug above went unnoticed because nothing ever
+    reported what the mod had actually read. If a value looks ten or a hundred
+    times too large in that list, the parse is at fault rather than the tuning.
+
+  * NEW [08 - Shop] section, all of it off by default:
+      Dump Shop Contents        - logs every shop row once, with its item id
+      Free Item Ids             - listed items cost nothing
+      Unlimited Stock Item Ids  - listed items never run out of stock
+    Items are targeted by id because the game gives them no category of their
+    own; the dump prints the ids. An unlisted item is untouched, so a shop with
+    nothing listed behaves exactly as vanilla.
+
+  * No balance values changed. Tiers, ramps, boss scaling and the shipped
+    per-encounter rules are all identical to 1.0.1 - but on a comma-decimal
+    system they will now actually take effect, which will feel like a large
+    difficulty DROP on the affected encounters. That is the bug being removed.
+
+
+-------------------------------------------------------------------------------
   1.0.1  -  Full game
 -------------------------------------------------------------------------------
 Documentation release. No gameplay, balance or tuning values were changed, and

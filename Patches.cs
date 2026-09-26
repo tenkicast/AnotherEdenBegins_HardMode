@@ -827,3 +827,158 @@ internal static class BossRosterDump
         }
     }
 }
+
+/// <summary>
+/// Shop overrides: sell listed items for nothing, and lift their purchase limit.
+///
+/// TWO EARLIER ATTEMPTS CRASHED THE GAME, both by hooking Sava.Main.ItemShopItem:
+///
+///   first   GetName() inside the dump died with an AccessViolationException in
+///           il2cpp_string_length. Price() is read while the shop UI is still being
+///           built, before the item's name string is resolved, so a bad IL2CPP string
+///           pointer was handed to the marshaller. A try/catch around it was NOT
+///           protection: AccessViolationException is a corrupted-state exception that
+///           .NET Core refuses to deliver to managed catch blocks.
+///
+///   second  Dropping the string was not enough. ItemID() - which returns a plain int -
+///           then died in il2cpp_runtime_invoke. Calling ANY method on that instance at
+///           that moment is unsafe, because ItemShopItem is a UI-side wrapper whose
+///           underlying item is not necessarily attached yet.
+///
+/// So ItemShopItem is the wrong object entirely. DomainShopContents is the domain
+/// wrapper around a shop row - the same layer as DomainEnemy, whose getters the reward
+/// hooks already read safely every battle. Its values are plain ints on a fully
+/// constructed object, and ItemShopItem is BUILT from them, so changing them here
+/// reaches the shop before the UI ever sees a price.
+/// </summary>
+[HarmonyPatch]
+internal static class ShopPatches
+{
+    /// <summary>Rows already printed by the dump, keyed by shop and item.</summary>
+    private static readonly HashSet<long> Dumped = new();
+
+    /// <summary>
+    /// Buy price. An unlisted item keeps its vanilla price exactly, so a shop with
+    /// nothing listed is untouched.
+    /// </summary>
+    [HarmonyPatch(typeof(DomainShopContents), nameof(DomainShopContents.Price), MethodType.Getter)]
+    [HarmonyPostfix]
+    private static void Price_Postfix(DomainShopContents __instance, ref int __result)
+    {
+        ModConfig cfg = HardModePlugin.Cfg;
+        if (cfg == null)
+            return;
+
+        bool free = __result != 0 && IdList.Contains(cfg.FreeItemIds.Value, __instance.ItemID);
+
+        // Logged BEFORE the override so the dump reports the game's own value, with
+        // the effective price alongside it - reading a vanilla price in the log and
+        // mistaking it for a failed override is an easy trap otherwise.
+        Dump(cfg, __instance, __result, free ? 0 : __result);
+
+        if (free)
+            __result = 0;
+    }
+
+    /// <summary>
+    /// How many the shop stocks. MEASURED, from a real Crimson Gem shop:
+    ///     stock=10 bought=2 left=8        <- a limited row; left = stock - bought
+    ///     stock=0  bought=0 left=0        <- the game's own "unlimited" rows
+    /// So the remaining count is derived live as Stock - StockCount.
+    ///
+    /// A FIXED stock does not work. Setting it to 99 leaves 99 - bought, and bought
+    /// only ever grows - it lives in save data - so the item would quietly run dry
+    /// after 99 purchases, possibly hours later. Instead the stock is pinned a fixed
+    /// distance AHEAD of the purchase count, so the remaining count is always
+    /// AlwaysRemaining however many have been bought. It cannot run out.
+    ///
+    /// Stock is NOT set to 0 even though that is the game's own unlimited marker,
+    /// because the remaining count would then compute as (0 - bought), i.e. negative
+    /// for anything already purchased. Keeping a real number stays on the ordinary
+    /// limited path the game already handles correctly.
+    ///
+    /// An earlier version also forced CurrentStockCount to 0, on the assumption it
+    /// counted purchases. The dump showed it is the REMAINING count, so that hook
+    /// reported a listed item as sold out - the opposite of the intent. It is gone.
+    /// </summary>
+    [HarmonyPatch(typeof(DomainShopContents), nameof(DomainShopContents.Stock), MethodType.Getter)]
+    [HarmonyPostfix]
+    private static void Stock_Postfix(DomainShopContents __instance, ref int __result)
+    {
+        ModConfig cfg = HardModePlugin.Cfg;
+        if (cfg == null)
+            return;
+
+        if (!IdList.Contains(cfg.UnlimitedStockItemIds.Value, __instance.ItemID))
+            return;
+
+        // Guarded so a pathological purchase count can never overflow into a negative
+        // stock, which would read as sold out.
+        int bought = __instance.StockCount;
+        if (bought < 0 || bought > int.MaxValue - AlwaysRemaining)
+            bought = 0;
+
+        int target = bought + AlwaysRemaining;
+
+        // Only ever raises. An item that already stocks more than this keeps its own.
+        if (target > __result)
+            __result = target;
+    }
+
+    /// <summary>
+    /// The remaining count the shop actually shows and gates purchases on.
+    ///
+    /// MEASURED: patching Stock alone fixed the price but NOT the stock, because
+    /// CurrentStockCount is a separate getter that derives its value from the master
+    /// row itself rather than by reading this object's Stock property - so a postfix
+    /// on Stock never reaches it. This is the getter the UI ends up displaying, via
+    /// the stock int that ShopListUIController.ItemData is constructed with.
+    ///
+    /// Held AT AlwaysRemaining rather than at 0. An earlier version set this to 0 on
+    /// the assumption it counted purchases; it is the remaining count, so that read
+    /// as sold out. Only ever raises.
+    /// </summary>
+    [HarmonyPatch(typeof(DomainShopContents), nameof(DomainShopContents.CurrentStockCount), MethodType.Getter)]
+    [HarmonyPostfix]
+    private static void CurrentStockCount_Postfix(DomainShopContents __instance, ref int __result)
+    {
+        ModConfig cfg = HardModePlugin.Cfg;
+        if (cfg == null || __result >= AlwaysRemaining)
+            return;
+
+        if (IdList.Contains(cfg.UnlimitedStockItemIds.Value, __instance.ItemID))
+            __result = AlwaysRemaining;
+    }
+
+    /// <summary>
+    /// How many of a listed item the shop always has left, no matter how many have
+    /// already been bought. Large enough to never gate a purchase, small enough to
+    /// still render as an ordinary number in the shop UI.
+    /// </summary>
+    private const int AlwaysRemaining = 99;
+
+    /// <summary>
+    /// Reports each shop row once, as PRIMITIVES ONLY - no string is touched anywhere
+    /// in this class, for the reason recorded at the top of the file. Match the row to
+    /// the item by the price the shop shows you on screen.
+    ///
+    /// Takes the price as an argument rather than re-reading contents.Price, which
+    /// would re-enter the postfix that called this.
+    /// </summary>
+    private static void Dump(ModConfig cfg, DomainShopContents contents, int price, int effectivePrice)
+    {
+        if (!cfg.DumpShopContents.Value)
+            return;
+
+        int shopId = contents.ShopId;
+        int itemId = contents.ItemID;
+
+        if (!Dumped.Add(((long)shopId << 32) | (uint)itemId))
+            return;
+
+        HardModePlugin.Logger.LogInfo(
+            $"SHOP shopId={shopId} itemId={itemId} price={price}"
+            + (effectivePrice == price ? string.Empty : $"->{effectivePrice}") + " "
+            + $"stock={contents.Stock} bought={contents.StockCount} left={contents.CurrentStockCount}");
+    }
+}

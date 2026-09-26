@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using BepInEx;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
@@ -11,7 +12,7 @@ public class HardModePlugin : BasePlugin
 {
     public const string Guid = "tenkicast_anotheredenbegins_hardmode";
     public const string Name = "Another Eden Begins - Hard Mode";
-    public const string Version = "1.0.1";
+    public const string Version = "1.0.2";
 
     internal static ModConfig Cfg;
     internal static ManualLogSource Logger;
@@ -56,6 +57,13 @@ public class HardModePlugin : BasePlugin
 
             if (Cfg.AlwaysEscape.Value)
                 ApplyPatches(typeof(EscapePatches), "guaranteed escape");
+
+            // Installed only when it would actually do something, so a player who has
+            // listed no item never carries the shop hooks at all.
+            if (Cfg.DumpShopContents.Value
+                || !string.IsNullOrWhiteSpace(Cfg.FreeItemIds.Value)
+                || !string.IsNullOrWhiteSpace(Cfg.UnlimitedStockItemIds.Value))
+                ApplyPatches(typeof(ShopPatches), "shop price and stock overrides");
         }
 
         if (!Cfg.ModActive)
@@ -86,10 +94,57 @@ public class HardModePlugin : BasePlugin
                         : string.Empty));
         Log.LogInfo($"Always escape: {Cfg.AlwaysEscape.Value}"
                     + (Cfg.AlwaysEscape.Value ? " (failed escape rolls are forced to succeed; battles that forbid fleeing are unaffected)" : string.Empty));
+        string freeIds = string.IsNullOrWhiteSpace(Cfg.FreeItemIds.Value) ? "none" : Cfg.FreeItemIds.Value;
+        string stockIds = string.IsNullOrWhiteSpace(Cfg.UnlimitedStockItemIds.Value) ? "none" : Cfg.UnlimitedStockItemIds.Value;
+        Log.LogInfo($"Shop: free item ids {freeIds}, unlimited stock item ids {stockIds}"
+                    + (Cfg.DumpShopContents.Value ? " (dumping shop contents)" : string.Empty));
+        ReportSpecialRules();
         Log.LogInfo($"Level-difference neutralisation: {Cfg.NeutralizeLevelDiff.Value}");
         Log.LogInfo($"Reserve party HP regen disabled: {Cfg.DisableBenchHpRegen.Value}");
         Log.LogInfo($"Reserve party MP regen disabled: {Cfg.DisableBenchMpRegen.Value}");
     }
+
+    /// <summary>
+    /// Prints the per-encounter rules AS PARSED, not as written, with the numbers
+    /// formatted invariantly so a dot always reads as a decimal point.
+    ///
+    /// This exists because a culture bug shipped in 1.0.1: on a comma-decimal locale
+    /// the old parser read "0.5" as 5 and "0.75" as 75, which turned one boss into
+    /// ATK x16 and a x108 damage multiplier. Nothing in the log showed what had been
+    /// read, so it took a user's boss-scaling dump to spot it. If a value here ever
+    /// looks ten or a hundred times too large, the parse is wrong - not the tuning.
+    /// </summary>
+    private void ReportSpecialRules()
+    {
+        string raw = Cfg.SpecialEnemyIds.Value;
+
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            Log.LogInfo("Per-encounter rules: none configured.");
+            return;
+        }
+
+        int count = 0;
+
+        foreach (long id in SpecialEnemies.ParsedIds(raw))
+        {
+            if (!SpecialEnemies.TryGet(raw, id,
+                    Cfg.SpecialEnemyHpScale.Value, Cfg.SpecialEnemyDamageScale.Value,
+                    Cfg.Active?.MaxSingleHitPercent.Value ?? 0f, out SpecialRule rule))
+                continue;
+
+            count++;
+            Log.LogInfo(
+                $"  rule {id}: hp {F(rule.HpScale)} dmg {F(rule.DamageScale)} "
+                + $"def {F(rule.DefScale)} atk {F(rule.AtkScale)} "
+                + $"cap {(rule.HitCapPercent <= 0f ? "off" : F(rule.HitCapPercent) + "%")}");
+        }
+
+        Log.LogInfo($"Per-encounter rules: {count} parsed (values shown as read, decimal point is '.').");
+    }
+
+    /// <summary>Invariant so the log is readable and comparable on any machine.</summary>
+    private static string F(float value) => value.ToString("0.00", CultureInfo.InvariantCulture);
 
     private void ApplyPatches(Type patchClass, string description)
     {

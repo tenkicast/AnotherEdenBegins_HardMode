@@ -91,6 +91,9 @@ internal sealed class ModConfig
     public readonly ConfigEntry<float> ExperienceMultiplier;
     public readonly ConfigEntry<float> MoneyMultiplier;
     public readonly ConfigEntry<bool> AlwaysEscape;
+    public readonly ConfigEntry<bool> DumpShopContents;
+    public readonly ConfigEntry<string> FreeItemIds;
+    public readonly ConfigEntry<string> UnlimitedStockItemIds;
 
     public readonly TierConfig Hard;
     public readonly TierConfig VeryHard;
@@ -272,6 +275,28 @@ internal sealed class ModConfig
             + "the dice roll from escapes that were already allowed. "
             + "*** IF THE GAME EVER CRASHES ON LAUNCH, SET THIS TO FALSE FIRST *** - the hook is not "
             + "installed at all when this is false.");
+
+        const string shop = "08 - Shop";
+
+        DumpShopContents = cfg.Bind(shop, "Dump Shop Contents", false,
+            "Logs every item a shop offers, once per item id, the first time its price is read. Prints "
+            + "the id next to the item's name, its price, whether it is stock-limited and how many the "
+            + "shop will currently sell you. This is how you find the id for the two settings below: the "
+            + "game gives items like the ability-reset potion no category of their own, so they can only "
+            + "be targeted by id. Turn it on, open the shop, read the log, then turn it off.");
+
+        FreeItemIds = cfg.Bind(shop, "Free Item Ids", string.Empty,
+            "Comma-separated item ids that cost nothing to buy, whatever currency the shop charges. "
+            + "Leave empty to change no prices at all. An item that is not listed keeps its vanilla "
+            + "price exactly, and selling is never touched - this only affects what you PAY. "
+            + "Use Dump Shop Contents to find an id. Example: 1234567,1234568");
+
+        UnlimitedStockItemIds = cfg.Bind(shop, "Unlimited Stock Item Ids", string.Empty,
+            "Comma-separated item ids whose purchase limit is lifted, so a shop never runs out of them. "
+            + "Only ever removes a limit - an item that was already unlimited is unaffected, and an item "
+            + "that is not listed keeps its vanilla stock. Independent of Free Item Ids: list an id in "
+            + "both to get an unlimited free item, or in one alone for just that half. "
+            + "Use Dump Shop Contents to find an id.");
 
         const string systems = "02 - Systems";
 

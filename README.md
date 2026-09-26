@@ -8,6 +8,8 @@ No game file is ever modified. The mod works entirely through in-memory hooks �
 >
 > **The BepInEx version matters more than anything else here.** You need a bleeding-edge BepInEx 6 build — the stable release crashes this game on startup. See [Installing](#installing-users) below; this is the single most common cause of "the mod doesn't work".
 >
+> **If your system uses a comma as the decimal separator, update to 1.0.2.** Versions before it read the per-encounter rules using your regional settings, so `0.5` was taken as `5`. On the affected encounters that produced wildly inflated stats — one boss measured at ATK ×16 with a ×108 damage multiplier. Fixed; no config change needed.
+>
 > Balance is tuned by hand and is a matter of taste. If a fight feels wrong, it probably is — please say so rather than assuming it's intended.
 >
 > Offered with no warranty of any kind — see the [LICENSE](LICENSE). It modifies no game files and touches no saves, so the worst realistic outcome is that the game fails to start.
@@ -28,6 +30,7 @@ No game file is ever modified. The mod works entirely through in-memory hooks �
 - **Per-encounter overrides** — eight hand-tuned story fights, targeted by exact enemy ID.
 - **Guaranteed escape** — fleeing always succeeds where the game permits fleeing at all.
 - **Optional EXP and money multipliers** — off by default.
+- **Shop overrides** — name any item by id to make it free, or to stop it ever running out of stock. Off by default.
 
 Player damage is untouched: no changes to weakness bonuses, Chain Skills, crit, or your stats. The difficulty comes entirely from the enemies.
 
@@ -59,6 +62,20 @@ Difficulty = Hard     # Off | Hard | VeryHard | Extreme
 Spelling matters — `VeryHard` is one word, capital H.
 
 Setting `Difficulty = Off` disables the entire mod without uninstalling it.
+
+### Shop overrides
+
+`[08 - Shop]` can make chosen items free, or give them unlimited stock:
+
+```ini
+Dump Shop Contents       = true      # find the ids, then turn this back off
+Free Item Ids            = 241911050
+Unlimited Stock Item Ids = 241911050
+```
+
+Items are targeted by **id**, because the game gives them no category of their own — an ability-reset potion is an ordinary consumable. Turn on the dump, open the shop, and the log prints a row per item; match yours by the price shown on screen. Anything not listed is untouched.
+
+All numbers in the config are read with the invariant culture, so **always write decimals with a dot**, whatever your system uses.
 
 ---
 

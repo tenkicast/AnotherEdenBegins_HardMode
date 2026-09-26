@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace AEBHardMode;
 
@@ -104,13 +105,29 @@ internal static class SpecialEnemies
     private static string _lastRaw;
     private static Dictionary<long, SpecialRule> _rules = new();
 
+    private static void EnsureParsed(string raw)
+    {
+        if (raw == _lastRaw)
+            return;
+
+        _lastRaw = raw;
+        _rules = Parse(raw);
+    }
+
+    /// <summary>
+    /// Every id the rule list actually produced, so startup can report what was read
+    /// rather than what was written. A silent mis-parse is exactly how the culture bug
+    /// survived to release.
+    /// </summary>
+    public static IEnumerable<long> ParsedIds(string raw)
+    {
+        EnsureParsed(raw);
+        return _rules.Keys;
+    }
+
     public static bool TryGet(string raw, long id, float defaultHp, float defaultDamage, float defaultHitCap, out SpecialRule rule)
     {
-        if (raw != _lastRaw)
-        {
-            _lastRaw = raw;
-            _rules = Parse(raw);
-        }
+        EnsureParsed(raw);
 
         if (!_rules.TryGetValue(id, out rule))
             return false;
@@ -132,6 +149,23 @@ internal static class SpecialEnemies
         return true;
     }
 
+    /// <summary>
+    /// Parses the rule list. EVERY number here is read with InvariantCulture, and that
+    /// is not cosmetic.
+    ///
+    /// These values are authored with a DOT in the config file and in the shipped
+    /// defaults. On a machine whose locale uses a COMMA as the decimal separator -
+    /// Italian, German, French, Spanish, most of Europe and South America - a
+    /// culture-sensitive float.TryParse reads the dot as a THOUSANDS separator, so
+    /// "0.5" silently becomes 5 and "0.75" becomes 75.
+    ///
+    /// MEASURED from a user log on an it-IT machine, Galliard Lv18 (0.5:0.75):
+    ///     HP x3.21  ATK x16.00  DEF x1.60  and a final damage multiplier of x108
+    ///     ENEMY hit (BOSS): 16470 -> 1778760  [156581% of max HP]
+    /// Every one of those figures is reproduced exactly by the mis-parse. Forest
+    /// Guardian (0.6:0.8) came out at x10.44 final damage instead of x1.044, which is
+    /// why it one-shot on all three tiers.
+    /// </summary>
     private static Dictionary<long, SpecialRule> Parse(string raw)
     {
         var parsed = new Dictionary<long, SpecialRule>();
@@ -141,14 +175,14 @@ internal static class SpecialEnemies
         foreach (string entry in raw.Split(','))
         {
             string[] fields = entry.Trim().Split(':');
-            if (fields.Length == 0 || !long.TryParse(fields[0].Trim(), out long id))
+            if (fields.Length == 0 || !long.TryParse(fields[0].Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out long id))
                 continue;
 
-            float hp = fields.Length > 1 && float.TryParse(fields[1].Trim(), out float h) ? h : float.NaN;
-            float dmg = fields.Length > 2 && float.TryParse(fields[2].Trim(), out float d) ? d : float.NaN;
-            float def = fields.Length > 3 && float.TryParse(fields[3].Trim(), out float f) ? f : float.NaN;
-            float atk = fields.Length > 4 && float.TryParse(fields[4].Trim(), out float a) ? a : float.NaN;
-            float cap = fields.Length > 5 && float.TryParse(fields[5].Trim(), out float c) ? c : float.NaN;
+            float hp = fields.Length > 1 && float.TryParse(fields[1].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out float h) ? h : float.NaN;
+            float dmg = fields.Length > 2 && float.TryParse(fields[2].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out float d) ? d : float.NaN;
+            float def = fields.Length > 3 && float.TryParse(fields[3].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out float f) ? f : float.NaN;
+            float atk = fields.Length > 4 && float.TryParse(fields[4].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out float a) ? a : float.NaN;
+            float cap = fields.Length > 5 && float.TryParse(fields[5].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out float c) ? c : float.NaN;
 
             parsed[id] = new SpecialRule(hp, dmg, def, atk, cap);
         }
@@ -194,5 +228,46 @@ internal static class Roll
 
             return (float)((h >> 11) / (double)(1UL << 53));
         }
+    }
+}
+
+/// <summary>
+/// Parses and caches a comma-separated list of integer ids from a config string.
+/// Cached on the raw string itself, so editing the config picks the new list up
+/// without a restart and a malformed entry is simply skipped rather than throwing
+/// inside a hook.
+/// </summary>
+internal static class IdList
+{
+    private static string _lastRaw;
+    private static HashSet<int> _ids = new();
+
+    public static bool Contains(string raw, int id)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+            return false;
+
+        if (!ReferenceEquals(raw, _lastRaw) && raw != _lastRaw)
+        {
+            _ids = Parse(raw);
+            _lastRaw = raw;
+        }
+
+        return _ids.Contains(id);
+    }
+
+    private static HashSet<int> Parse(string raw)
+    {
+        var ids = new HashSet<int>();
+
+        foreach (string part in raw.Split(','))
+        {
+            string trimmed = part.Trim();
+
+            if (trimmed.Length != 0 && int.TryParse(trimmed, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value))
+                ids.Add(value);
+        }
+
+        return ids;
     }
 }

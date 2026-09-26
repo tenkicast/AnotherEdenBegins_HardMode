@@ -1,6 +1,6 @@
 ===============================================================================
   ANOTHER EDEN BEGINS - HARD MODE
-  Version 1.0.1
+  Version 1.0.2
 ===============================================================================
 
 Another Eden Begins is generous. This makes it fight back.
@@ -25,6 +25,15 @@ code only - there are no downloads there.
 The BepInEx version matters more than anything else here. You need a BLEEDING
 EDGE BepInEx 6 build - the stable release crashes this game on startup. See
 REQUIREMENTS below. This is by far the most common cause of "it doesn't work".
+
+IF YOUR SYSTEM USES A COMMA AS THE DECIMAL SEPARATOR, USE 1.0.2 OR NEWER.
+Earlier versions read the per-encounter rules using your regional settings, so
+"0.5" was taken as 5. On the affected encounters that produced wildly inflated
+stats - one boss measured at ATK x16 with a x108 damage multiplier. This is
+fixed in 1.0.2 and needs no config change.
+
+Always write decimals with a DOT in the settings file, whatever your system
+uses. Every number is now read the same way on every machine.
 
 Balance is tuned by hand and is a matter of taste. If a fight feels wrong, it
 probably is - please say so rather than assuming it is intended.
@@ -159,6 +168,29 @@ Experience is boosted BEFORE the game's own level correction, so farming enemies
 far below your level stays as unrewarding as the game intends. Shop and
 equipment prices are never touched, so your income rises without your costs
 rising to match.
+
+
+-------------------------------------------------------------------------------
+  OPTIONAL - FREE OR UNLIMITED SHOP ITEMS
+-------------------------------------------------------------------------------
+Under [08 - Shop] you can make chosen items cost nothing, or stop them running
+out of stock. Everything here is OFF by default and an item you do not list is
+left exactly as the game has it.
+
+Items are targeted by ID, because the game gives them no category of their own -
+an ability-reset potion is an ordinary consumable like any herb. To find an id:
+
+1. Set   Dump Shop Contents = true
+2. Launch, open the shop, quit.
+3. The log has one line per item, for example:
+       SHOP shopId=204018831 itemId=241911050 price=5 stock=10 bought=2 left=8
+   Match yours by the PRICE the shop showed you on screen.
+4. Put the id into either or both settings, then set the dump back to false:
+       Free Item Ids            = 241911050
+       Unlimited Stock Item Ids = 241911050
+
+The two lists are independent - an item can be free without being unlimited, or
+unlimited without being free. Several ids are separated by commas.
 
 
 -------------------------------------------------------------------------------
