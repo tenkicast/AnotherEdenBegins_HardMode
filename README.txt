@@ -263,6 +263,8 @@ No part of the mod is gated behind it, and nothing nags you in-game.
 -------------------------------------------------------------------------------
 Built with BepInEx and HarmonyX.
 
+Credit to Kurein for Playtesting and Bug Fixes.
+
 The mod works entirely through in-memory hooks. It does not write to your game
 files, your asset bundles, your master data or your saves. Deleting the plugin
 restores the vanilla game exactly as it was.
