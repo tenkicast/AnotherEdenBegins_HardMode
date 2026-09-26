@@ -153,4 +153,6 @@ Released under the [MIT License](LICENSE).
 
 Built with [BepInEx](https://github.com/BepInEx/BepInEx) and [HarmonyX](https://github.com/BepInEx/HarmonyX).
 
+Credit to Kurein for Playtesting and Bug Fixes.
+
 Not affiliated with or endorsed by the developers or publishers of *Another Eden Begins*.
